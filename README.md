@@ -8,15 +8,17 @@
 In this repo, we implement an approach that reduces the depth of quantum circuits, specifically focusing on the CNOT gate.
 ```bash
 .
-├── ImprovedGreedy.py
-    ├── AES.txt
-    ├── Greedy.py
+├── main.py
+    ├── RowGreedy.py
+    ├── ColGreedy.py
+    ├── LocalMinimumGreedy.py
+    ├── ParallelGreedy.py
         ├── config.py
 	├── Can_depth_one.py
         ├── cost_function.py
         ├── operations.py
         ├── writers.py
-    └── verify.py
+        └── verify.py
 ```
 
 ## Installation
@@ -34,7 +36,7 @@ pip install copy
 ## Usage
 The command executes this Greedy algorithm
 ```
-python3 ImprovedGreedy.py
+python3 main.py <Matrix> <Size> <Greedy Selection> <Cost Function> <Input Norm Type> <Input Norm P Value> <Times>
 ```
 ## Result
 The algorithm generates the CNOT synthesis result record in files
