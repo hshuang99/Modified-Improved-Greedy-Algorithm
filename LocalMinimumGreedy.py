@@ -1,0 +1,331 @@
+import operations
+import cost_function
+import sys
+import copy
+import writers
+import generator
+import selector
+import numpy as np
+import random
+import configparser
+
+def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
+    SIZE = len(mat)
+    depth = 0
+    #minm denote as depth
+    minm = sys.float_info.max
+    minm_size = SIZE**2
+    minm_cost = sys.float_info.max  # Initialize with current cost
+    #copy the current matrix from input
+    origin = copy.deepcopy(mat)
+    inverse = operations.inv(mat)
+    row_visi = [0]*SIZE
+    col_visi = [0]*SIZE
+    select_list = []
+    L_r = []
+    L_c = []
+    Ls_r = []
+    Ls_c = []
+    row_op = []
+    col_op = []
+    B_row = []
+    B_col = []
+    normType = ""
+    pValue = 0
+    config = configparser.ConfigParser()
+    config.read('LocalMinimaConfig.ini')
+    LIMIT = int(config.get('DEPTH', 'localMinimaLimit'))
+
+    best_row_cst = sys.float_info.max
+    best_col_cst = sys.float_info.max
+
+    stuck_counter = 0
+    max_stuck_iterations = 3
+
+    if CostFunction == "norm":
+        #normType = input("Please select a Type for norm cost function, e.g. L1, L2, Lp, Linf: ")
+        normType = inputNormType
+        if normType == "Lp":
+            #pValue = input("Please decide the p value for Lp, e.g., 3, ,4, ...: ")
+            pValue = inputPValue
+    else:
+        normType = ""
+        pValue = 0
+
+    #go through the matrix and execute the row operations
+    #outter while check matrix whether permutation
+    while not operations.is_permutation_matrix(mat):
+        print("\n=== Starting new iteration ===")
+        print("Current depth:", depth)
+        print("Current cost:", minm_cost)
+        print("Stuck counter:", stuck_counter)
+        print("Row visited:", row_visi)
+        print("Col visited:", col_visi)
+        L_row = []
+        L_col = []
+        select_list = []
+        L_row_cst = []
+        L_col_cst = []
+        B_row = []
+        B_col = []
+
+        for i in range(0, SIZE):
+            if row_visi[i] == 1:
+                continue
+            for j in range(0, SIZE):
+                if row_visi[j] == 1 or j == i:
+                    continue
+                L_row.append((i, j))
+
+        for i in range(0, SIZE):
+            if col_visi[i] == 1:
+                continue
+            for j in range(0, SIZE):
+                if col_visi[j] == 1 or j == i:
+                    continue
+                L_col.append((i, j))
+
+        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, normType, pValue)
+        
+        #collection row operations phase
+        for op_row in L_row:
+            tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
+            tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
+            L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, normType, pValue))
+
+        for index, row_op_cst in enumerate(L_row_cst):
+            if row_op_cst < minm_cost:
+                if row_op_cst < best_row_cst:
+                    B_row.clear()
+                    best_row_cst = row_op_cst
+                if row_op_cst == best_row_cst:
+                    op = (L_row[index][0], L_row[index][1], 0)
+                    B_row.append(op)
+                
+        #collection column operations phase
+        for op_col in L_col:
+            tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
+            tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
+            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, normType, pValue))
+                
+        for index, col_op_cst in enumerate(L_col_cst):
+            if col_op_cst < minm_cost:
+                if col_op_cst < best_col_cst:
+                    B_col.clear()
+                    best_col_cst = col_op_cst
+                if col_op_cst == best_col_cst:
+                    op = (L_col[index][0], L_col[index][1], 1)
+                    B_col.append(op)
+
+        print("The B_row and best_row_cst:", B_row, best_row_cst)
+        print("The B_col and best_col_cst:", B_col, best_col_cst)
+
+        is_stuck = len(B_row) == 0 and len(B_col) == 0
+
+        if is_stuck:
+            stuck_counter += 1
+            print(f"WARNING: Local minima detected! Stuck counter: {stuck_counter}/{max_stuck_iterations}")
+        else:
+            stuck_counter = 0
+
+        if stuck_counter >= max_stuck_iterations or (is_stuck and sum(row_visi) == 0 and sum(col_visi) == 0):
+            print("=== ESCAPING LOCAL MINIMA ===")
+
+            escape_candidates = []
+
+            for op_row in L_row:
+                tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
+                tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
+                tmp_row_cst = cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, normType, pValue)
+
+                escape_candidates.append((tmp_row_cst, op_row[0], op_row[1], 0))
+
+            for op_col in L_col:
+                tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
+                tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
+                tmp_col_cst = cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, normType, pValue)
+
+                escape_candidates.append((tmp_col_cst, op_col[0], op_col[1], 1))
+
+            if len(escape_candidates) > 0:
+                escape_candidates.sort(key=lambda x: x[0])
+                best_escape = escape_candidates[0]
+
+                print(f"Escaping with operation: ({best_escape[1]}, {best_escape[2]}, {best_escape[3]})")
+                print(f"Accepting cost increase from {minm_cost} to {best_escape[0]}")
+
+                select_list = [(best_escape[1], best_escape[2], best_escape[3])]
+                minm_cost = best_escape[0]
+                stuck_counter = 0
+            else:
+                # No operations available at all - should not happen
+                print("CRITICAL: No operations available. Breaking out of loop.")
+                break
+        else:
+            if best_row_cst < best_col_cst:
+                select_list = B_row
+                minm_cost = best_row_cst
+            elif best_row_cst > best_col_cst:
+                select_list = B_col
+                minm_cost = best_col_cst
+            else:
+                select_list = B_col if len(B_col) > 0 else B_row
+                minm_cost = best_col_cst if len(select_list) > 0 else minm_cost
+        
+        print(f"The L_r after collection: {L_r}")
+        print(f"The L_c after collection: {L_c}")
+
+        # Execution phase
+        if len(select_list) == 0:
+            if len(L_r) > 0:
+                Ls_r.append(L_r)
+                L_r = []
+                row_visi = [0]*SIZE
+            if len(L_c) > 0:
+                Ls_c.append(L_c)
+                L_c = []
+                col_visi = [0]*SIZE
+        else:
+            rand = random.randint(0, len(select_list)-1)
+            select_operator = select_list[rand]
+            print(f"Executing operation: {select_operator}")
+
+            if select_operator[2] == 0:
+                mat = operations.row_i2j(mat, select_operator[0], select_operator[1])
+                inverse = operations.col_i2j(inverse, select_operator[1], select_operator[0])
+                L_r.append((select_operator[0], select_operator[1], 0))
+                row_op.append((select_operator[0], select_operator[1], 0))
+                if sum(row_visi) == 0:
+                    depth = depth+1
+                row_visi[select_operator[0]] = 1
+                row_visi[select_operator[1]] = 1
+                print("Currently Row operations:", row_op)
+            else:
+                mat = operations.col_i2j(mat, select_operator[0], select_operator[1])
+                inverse = operations.row_i2j(inverse, select_operator[1], select_operator[0])
+                L_c.append((select_operator[0], select_operator[1], 1))
+                op = (select_operator[0], select_operator[1], 1)
+                col_op.append(op)
+                if sum(col_visi) == 0:
+                    depth = depth+1
+                col_visi[select_operator[0]] = 1
+                col_visi[select_operator[1]] = 1
+                print("Currently Column oeprations:", col_op)
+
+
+        # Check depth limit
+        if depth > LIMIT:
+            print(f"Depth {depth} over minimum limit {LIMIT}, so break this iteration")
+            return
+        else:
+            config['DEPTH'] = {'localMinimaLimit': depth}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+    '''
+    check the last iteration
+    '''
+    if len(L_r) > 0:
+        Ls_r.append(L_r)
+        L_r = []
+        row_visi = [0]*SIZE
+        L_row = []
+    if len(L_c) > 0:
+        Ls_c.append(L_c)
+        L_c = []
+        col_visi = [0]*SIZE
+        L_col = []
+
+    '''
+    check the matrix is different from origin matrix
+    '''
+    reduce = copy.deepcopy(origin)
+    size = 0
+    for r_op in row_op:
+        reduce = operations.row_i2j(reduce, r_op[0], r_op[1])
+        size += 1
+    for c_op in col_op:
+        reduce = operations.col_i2j(reduce, c_op[0], c_op[1])
+        size += 1
+
+    ok = True
+    if ((reduce != mat).all()):
+        ok = False
+
+    if (depth > minm or (depth == minm and size >= minm_size) or not ok):
+        return
+
+    '''
+    update depth and amounts of CNOT
+    '''
+    minm = depth
+    size_minm = size
+
+    '''
+    create the permutation matrix
+    '''
+    per = [0]*SIZE
+    for i in range(SIZE):
+        for j in range(SIZE):
+            if mat[i][j] == 1:
+                per[i] = j
+    
+    '''            
+    create the operation sequence
+    '''
+    seq = []
+    for op_c in col_op:
+        seq.append((op_c[0], op_c[1], 1))
+    for op_r in reversed(row_op):
+        seq.append((per[op_r[0]], per[op_r[1]], 0))
+    
+    print("The sequence in Final:", seq)
+    '''
+    create layers for operations
+    '''
+    layers = []
+    for lay_c in Ls_c:
+        nl_c = []
+        for l_c in lay_c:
+            nl_c.append((l_c[0], l_c[1], 1))
+        print("The nl_c:", nl_c)
+        layers.append(nl_c)
+            
+    Ls_r.reverse()
+    for lay_r in Ls_r:
+        nl_r = []
+        for l_r in lay_r:
+            nl_r.append((per[l_r[0]], per[l_r[1]], 0))
+        print("The nl_r:", nl_r)
+        layers.append(nl_r)
+
+    print("The layers in final:", layers)
+    '''
+    Verify the Layers is work
+    1. The collection operators should make identity recover to original matrix
+    2. Every layer and each operator should be distinct
+    '''
+    correct = operations.Verify(origin, layers, seq, mat)
+
+    if correct:
+        with open(f"Local_Minima_{SIZE}-block_Layer_Results", "a") as f:
+            for l in layers:
+                for lay in l:
+                    f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
+                f.write("\n")
+            if CostFunction == "norm":
+                if inputPValue == "Lp":
+                    f.write("CNOT: %d, depth: %d and cost function: %s with %s and p value: %s occur in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, inputPValue, occur))
+                else:
+                    f.write("CNOT: %d, depth: %d and cost function: %s with %s occur in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, occur))
+            else:
+                f.write("CNOT: %d, depth: %d and cost function: %s occur in %d\n" % (len(seq), len(layers), CostFunction, occur))
+        f.close()
+        #store the operations from sequence
+        with open(f"Local_Minima_{SIZE}-block_Sequence_Results", "a") as f:
+            for i in seq:
+                f.write("%d, %d, %d\n" % (i[0], i[1], i[2]))
+            f.write("CNOT: %d\n" % (len(seq)))
+        f.close()
+
+    print(str(SIZE) + "-block size for Square Cost that the depth is: ", minm, " and size is: ", size_minm)
+    print(f"The select cost function used in {SIZE} matrix and cost function: {CostFunction}")
