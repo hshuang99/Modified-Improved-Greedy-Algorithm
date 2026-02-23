@@ -5,7 +5,7 @@
 - [Result](#Result)
 
 ## About
-In this repo, we implement an approach that reduces the depth of quantum circuits, specifically focusing on the CNOT gate.
+In this project, we implement an approach that reduces the depth of quantum circuits, specifically focusing on the CNOT gate.
 ```bash
 .
 ├── main.py
