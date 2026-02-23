@@ -36,9 +36,15 @@ def Greedy(mat, select):
 	minm_cost = sys.float_info.max
 	
 	#Predefine the operator and lists
+<<<<<<< HEAD
 	select_list = [] #store every operations can reduce the cost
 	row_visi = [0]*config.SIZE
 	col_visi = [0]*config.SIZE
+=======
+	row_visi = [0]*config.SIZE
+	col_visi = [0]*config.SIZE
+	select_list = []
+>>>>>>> recovered
 	layer_r = []
 	layer_c = []
 	layers_r = []

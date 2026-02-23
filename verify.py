@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import numpy as np
+=======
+>>>>>>> recovered
 import config
 import operations
 import copy
@@ -14,6 +17,7 @@ def Verify(mat, select):
 	#Then open the sequence file depends on selection
 	if select == 0:
 		seq_file = open(config.sq_Seq_File, "r")
+<<<<<<< HEAD
 		seq_file.read()
 	elif select == 1:
 		seq_file = open(config.prod_Seq_File, "r")
@@ -25,6 +29,19 @@ def Verify(mat, select):
 		seq_data = line.split()
 		#if read the CNOT in the line then break
 		if seq_data[0] == 'CNOT:':
+=======
+	elif select == 1:
+		seq_file = open(config.prod_Seq_File, "r")
+
+	#Readline with seq_file
+	for line in seq_file:
+		if not line.strip():
+			continue
+		#Separate each space in the line
+		seq_data = line.split()
+		#if read the CNOT in the line then break
+		if seq_data and seq_data[0] == 'CNOT:':
+>>>>>>> recovered
 			break
 		#Insert the tuple element into list
 		seq_data_list.append(seq_data)
