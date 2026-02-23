@@ -14,7 +14,7 @@ In this repo, we implement an approach that reduces the depth of quantum circuit
     ├── LocalMinimumGreedy.py
     ├── ParallelGreedy.py
         ├── config.py
-	├── Can_depth_one.py
+        ├── Can_depth_one.py
         ├── cost_function.py
         ├── operations.py
         ├── writers.py
