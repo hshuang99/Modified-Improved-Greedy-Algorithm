@@ -11,7 +11,7 @@ import configparser
 
 def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     SIZE = len(mat)
-    depth = 0;
+    depth = 0
     #minm denote as depth
     minm = sys.float_info.max
     minm_size = sys.float_info.max
