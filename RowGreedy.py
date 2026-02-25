@@ -95,6 +95,8 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                     op = (L_row[index][0], L_row[index][1], 0)
                     select_list.append(op)
                     minm_cost = row_op_cst
+                elif row_op_cst == minm_cost:
+                    select_list.append((L_row[index][0], L_row[index][1], 0))
 
         for op_col in L_col:
             tmp_mat = operations.col_i2j(mat, op_col[0], op_col[1])
@@ -107,6 +109,8 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                 op = (L_col[index][0], L_col[index][1], 1)
                 select_list.append(op)
                 minm_cost = col_op_cst
+            elif col_op_cst == minm_cost:
+                select_list.append((L_col[index][0], L_col[index][1], 1))
 
         print("The select list and current minm cost: ", select_list, minm_cost)
               
