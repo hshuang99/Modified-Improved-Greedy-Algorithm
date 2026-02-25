@@ -2,8 +2,6 @@ import operations
 import cost_function
 import sys
 import copy
-import writers
-import generator
 import selector
 import numpy as np
 import random
@@ -30,8 +28,6 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     col_op = []
     B_row = []
     B_col = []
-    normType = ""
-    pValue = 0
     config = configparser.ConfigParser()
     config.read('LocalMinimaConfig.ini')
     LIMIT = int(config.get('DEPTH', 'localMinimaLimit'))
@@ -41,16 +37,6 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
 
     stuck_counter = 0
     max_stuck_iterations = 3
-
-    if CostFunction == "norm":
-        #normType = input("Please select a Type for norm cost function, e.g. L1, L2, Lp, Linf: ")
-        normType = inputNormType
-        if normType == "Lp":
-            #pValue = input("Please decide the p value for Lp, e.g., 3, ,4, ...: ")
-            pValue = inputPValue
-    else:
-        normType = ""
-        pValue = 0
 
     #go through the matrix and execute the row operations
     #outter while check matrix whether permutation
@@ -85,13 +71,13 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                     continue
                 L_col.append((i, j))
 
-        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, normType, pValue)
+        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
         
         #collection row operations phase
         for op_row in L_row:
             tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
             tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
-            L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, normType, pValue))
+            L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, inputNormType, inputPValue))
 
         for index, row_op_cst in enumerate(L_row_cst):
             if row_op_cst < minm_cost:
@@ -106,7 +92,7 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         for op_col in L_col:
             tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
             tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
-            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, normType, pValue))
+            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, inputNormType, inputPValue))
                 
         for index, col_op_cst in enumerate(L_col_cst):
             if col_op_cst < minm_cost:
@@ -136,14 +122,14 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
             for op_row in L_row:
                 tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
                 tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
-                tmp_row_cst = cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, normType, pValue)
+                tmp_row_cst = cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, inputNormType, inputPValue)
 
                 escape_candidates.append((tmp_row_cst, op_row[0], op_row[1], 0))
 
             for op_col in L_col:
                 tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
                 tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
-                tmp_col_cst = cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, normType, pValue)
+                tmp_col_cst = cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, inputNormType, inputPValue)
 
                 escape_candidates.append((tmp_col_cst, op_col[0], op_col[1], 1))
 

@@ -4,7 +4,6 @@ import cost_function
 import sys
 import random
 import copy
-import writers
 from RowGreedy import rowGreedy
 
 '''

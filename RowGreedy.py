@@ -2,9 +2,7 @@ import operations
 import cost_function
 import copy
 import sys
-import writers
 import selector
-import generator
 import numpy as np
 import random
 import configparser
@@ -32,22 +30,10 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     col_op = []
     select_list = []
     one = False
-    normType = ""
-    pValue = 0
     config = configparser.ConfigParser()
     config.read('RowConfig.ini')
     LIMIT = int(config.get('DEPTH', 'rowLimit'))
     
-    if CostFunction == "norm":
-        #normType = input("Please select a Type for norm cost function, e.g. L1, L2, Lp, Linf: ")
-        normType = inputNormType
-        if normType == "Lp":
-            #pValue = input("Please decide the p value for Lp, e.g., 3, 4, ...: ")
-            pValue = inputPValue
-    else:
-        normType = ""
-        pValue = 0
-        
     '''
     According to the paper the greedy algorithm will limited for double SIZE
     '''
@@ -62,7 +48,7 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         L_row_cst = []
         L_col_cst = []
 
-        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, normType, pValue)
+        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
 
         print("Current Minm Cost:", minm_cost)
         for i in range(0, SIZE):
@@ -87,7 +73,7 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                 # Execute the selected operation using the helper function
                 tmp_mat = operations.row_i2j(mat, op_row[0], op_row[1])
                 tmp_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
-                L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_mat, tmp_inv, normType, pValue))
+                L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_mat, tmp_inv, inputNormType, inputPValue))
 
             for index, row_op_cst in enumerate(L_row_cst):
                 if row_op_cst < minm_cost:
@@ -101,7 +87,7 @@ def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         for op_col in L_col:
             tmp_mat = operations.col_i2j(mat, op_col[0], op_col[1])
             tmp_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
-            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_mat, tmp_inv, normType, pValue))
+            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_mat, tmp_inv, inputNormType, inputPValue))
 
         for index, col_op_cst in enumerate(L_col_cst):
             if col_op_cst < minm_cost:
