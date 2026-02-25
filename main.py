@@ -1,11 +1,10 @@
 import numpy as np
 import sys
-from RowGreedy import RowGreedy
-from ColGreedy import ColGreedy
+from modifiedImprovedGreedy import modifiedImprovedGreedy
+from RowGreedy import rowGreedy
+from ColGreedy import colGreedy
 from LocalMinimumGreedy import localMinimumGreedy
 from ParallelGreedy import parallelGreedy
-import threading
-import time
 
 np.set_printoptions(threshold=sys.maxsize) #setting for print full numpy matrix
 '''
@@ -18,15 +17,14 @@ def main(Matrix, Size, Greedy, CostFunction, inputNormType, inputPValue, times):
     for i in range(0, int(times)):
         match Greedy:
             case "Row":
-                RowGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
+                rowGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
             case "Col":
-	            ColGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
+                colGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
             case "LocalMinima":
                 localMinimumGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
             case "Parallel":
                 parallelGreedy(matrix, CostFunction, inputNormType, inputPValue, i)
-            case _:
-                return "Something is wrong with the selection"
+
 if __name__ == "__main__":
     if len(sys.argv) != 8:
         print(f"Usage: python3 {sys.argv[0]} <matrix> <size> <greedy selection> <cost function> <input norm type> <input p value> <times>")

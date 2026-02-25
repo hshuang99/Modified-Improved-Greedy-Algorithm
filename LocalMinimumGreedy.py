@@ -219,7 +219,7 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
             return
         else:
             config['DEPTH'] = {'localMinimaLimit': depth}
-            with open('config.ini', 'w') as configfile:
+            with open('LocalMinimaConfig.ini', 'w') as configfile:
                 config.write(configfile)
     '''
     check the last iteration
@@ -307,7 +307,7 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     correct = operations.Verify(origin, layers, seq, mat)
 
     if correct:
-        with open(f"Local_Minima_{SIZE}-block_Layer_Results", "a") as f:
+        with open(f"Local_Minima_{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
             for l in layers:
                 for lay in l:
                     f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
@@ -321,7 +321,7 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                 f.write("CNOT: %d, depth: %d and cost function: %s occur in %d\n" % (len(seq), len(layers), CostFunction, occur))
         f.close()
         #store the operations from sequence
-        with open(f"Local_Minima_{SIZE}-block_Sequence_Results", "a") as f:
+        with open(f"Local_Minima_{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
             for i in seq:
                 f.write("%d, %d, %d\n" % (i[0], i[1], i[2]))
             f.write("CNOT: %d\n" % (len(seq)))

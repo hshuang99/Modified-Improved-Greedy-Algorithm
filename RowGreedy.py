@@ -9,7 +9,7 @@ import numpy as np
 import random
 import configparser
 
-def RowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
+def rowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     '''
     Define variables
     '''
@@ -154,7 +154,7 @@ def RowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
             return #finally break this iteration
         else:
             config['DEPTH'] = {'rowLimit': depth}
-            with open('config.ini', 'w') as configfile:
+            with open('RowConfig.ini', 'w') as configfile:
                 config.write(configfile)
 
     '''
@@ -171,7 +171,6 @@ def RowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         L_c = []
         col_visi = [0]*SIZE
         L_col = []
-
     '''
     check the matrix is different from origin matrix
     '''
@@ -237,7 +236,7 @@ def RowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     '''
     correct = operations.Verify(origin, layers, seq, mat)
     if correct:
-        with open(f"Row_{SIZE}-block_Layer_Results", "a") as f:
+        with open(f"Row_{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
             for l in layers:
                 for lay in l:
                     f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
@@ -252,7 +251,7 @@ def RowGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         f.close()
         
         #store the operations from sequence
-        with open(f"Row_{SIZE}-block_Sequence_Results", "a") as f:
+        with open(f"Row_{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
             for i in seq:
                 f.write("%d, %d, %d\n" % (i[0], i[1], i[2]))
                 f.write("CNOT: %d\n" % (len(seq)))
