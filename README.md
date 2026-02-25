@@ -56,6 +56,7 @@ python3 main.py Matrix/AES.txt 32 LocalMinima origin "" 0 1
 The algorithm generates the CNOT synthesis result record in files, for example, we will make two results
 ### Layer Results
 This result presents the available operators for each layer and records the number of CNOT gates and the circuit depth of the quantum circuit.
+Each operator is denoted as (i, j, operation), where 0 represents a row operation and 1 represents a column operation.
 ```
 (7 15 1)|(6 22 1)|(14 30 1)|(23 31 1)|(28 12 1)|(13 29 1)|(20 4 1)|(21 5 1)|(27 3 1)|(26 10 1)|(2 18 1)|(24 8 1)|(11 19 1)|(25 1 1)|(9 17 1)|(16 0 1)|
 (31 15 1)|(5 29 1)|(27 11 1)|(21 13 1)|(19 3 1)|(17 1 1)|(0 7 1)|(25 9 1)|(18 2 1)|(22 14 1)|(20 28 1)|(12 23 1)|(16 24 1)|
