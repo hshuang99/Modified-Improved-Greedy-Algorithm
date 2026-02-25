@@ -40,13 +40,13 @@ The command executes this Greedy algorithm
 ```
 python3 main.py <Matrix> <Size> <Greedy Selection> <Cost Function> <Input Norm Type> <Input Norm P Value> <Times>
 ```
-Matrix: The matrix what we testing
-Size: The size of the matrix you need to assign. Some matrices have the same structure but different sizes, such as 32×32 and 16×16 versions.
-Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Local Minima, and Parallel.
-Cost Function: The cost function used to calculate the operation cost. You can choose from sum, origin, square, log, and norm. The norm options include L1, L2, Lp (e.g., 3, 4, ...), and Linf.
-Input Norm Type: If you choose the L-norm cost function, you need to specify the norm type. If you select another type of cost function, enter an empty string ("") for this parameter.
-Input Norm P Value: If you choose the Lp norm cost function, you must provide a number greater than 2 (e.g., 3, 4, ...). If you do not choose the Lp norm function, enter 0.
-Times: The number of iterations you want to run.
+- Matrix: The matrix what we testing
+- Size: The size of the matrix you need to assign. Some matrices have the same structure but different sizes, such as 32×32 and 16×16 versions.
+- Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Local Minima, and Parallel.
+- Cost Function: The cost function used to calculate the operation cost. You can choose from sum, origin, square, log, and norm. The norm options include L1, L2, Lp (e.g., 3, 4, ...), and Linf.
+- Input Norm Type: If you choose the L-norm cost function, you need to specify the norm type. If you select another type of cost function, enter an empty string ("") for this parameter.
+- Input Norm P Value: If you choose the Lp norm cost function, you must provide a number greater than 2 (e.g., 3, 4, ...). If you do not choose the Lp norm function, enter 0.
+- Times: The number of iterations you want to run.
 ## Result
 The algorithm generates the CNOT synthesis result record in files, for example, we will make two results
 ### Layer Results
