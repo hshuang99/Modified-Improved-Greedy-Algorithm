@@ -1,31 +1,13 @@
 import operations
 import cost_function
 import sys
-import copy
 import selector
-import numpy as np
-import random
 import configparser
 
-def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
+def parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth):
     SIZE = len(mat)
-    depth = 0
-    #minm denote as depth
-    minm = sys.float_info.max
-    minm_size = sys.float_info.max
     minm_cost = sys.float_info.max  # Initialize with current cost
-    #copy the current matrix from input
-    origin = copy.deepcopy(mat)
-    inverse = operations.inv(mat)
-    row_visi = [0]*SIZE
-    col_visi = [0]*SIZE
     select_list = []
-    L_r = []
-    L_c = []
-    Ls_r = []
-    Ls_c = []
-    row_op = []
-    col_op = []
     B_row = []
     B_col = []
     config = configparser.ConfigParser()
@@ -50,61 +32,24 @@ def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         L_row = []
         L_col = []
 
-        for i in range(0, SIZE):
-            if row_visi[i] == 1:
-                continue
-            for j in range(0, SIZE):
-                if row_visi[j] == 1 or j == i:
-                    continue
-                L_row.append((i, j))
-
-        for i in range(0, SIZE):
-            if col_visi[i] == 1:
-                continue
-            for j in range(0, SIZE):
-                if col_visi[j] == 1 or j == i:
-                    continue
-                L_col.append((i, j))
-
         select_list = []
         L_row_cst = []
         L_col_cst = []
 
-        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
 
         B_row = []
         B_col = []
+        
+        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
+        print("Current cost:", minm_cost)
+
+        L_row = operations.L_collection(L_row, row_visi, SIZE)
+        L_col = operations.L_collection(L_col, col_visi, SIZE)
 
         if not one:
-            #collection row operations phase
-            for op_row in L_row:
-                tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
-                tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
-                L_row_cst.append(cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, inputNormType, inputPValue))
+            B_row, best_row_cst, minm_cost = selector.modified_available_row_operator_selection(L_row, L_row_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, best_row_cst, B_row)
 
-            for index, row_op_cst in enumerate(L_row_cst):
-                if row_op_cst < minm_cost:
-                    if row_op_cst < best_row_cst:
-                        B_row = []
-                        best_row_cst = row_op_cst
-                    if row_op_cst == best_row_cst:
-                        op = (L_row[index][0], L_row[index][1], 0)
-                        B_row.append(op)
-
-        #collection column operations phase
-        for op_col in L_col:
-            tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
-            tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
-            L_col_cst.append(cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, inputNormType, inputPValue))
-
-        for index, col_op_cst in enumerate(L_col_cst):
-            if col_op_cst < minm_cost:
-                if col_op_cst < best_col_cst:
-                    B_col = []
-                    best_col_cst = col_op_cst
-                if col_op_cst == best_col_cst:
-                    op = (L_col[index][0], L_col[index][1], 1)
-                    B_col.append(op)
+        B_col, best_col_cst, minm_cost = selector.modified_available_col_operator_selection(L_col, L_col_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, best_col_cst, B_col)
 
         print("The B_row and best_row_cst:", B_row, best_row_cst)
         print("The B_col and best_col_cst:", B_col, best_col_cst)
@@ -122,25 +67,15 @@ def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         if stuck_counter >= max_stuck_iterations or (is_stuck and sum(row_visi) == 0 and sum(col_visi) == 0):
             print("=== ESCAPING LOCAL MINIMA ===")
 
-            escape_candidates = []
+            escapeCandidates = []
 
-            for op_row in L_row:
-                tmp_row_mat = operations.row_i2j(mat, op_row[0], op_row[1])
-                tmp_row_inv = operations.col_i2j(inverse, op_row[1], op_row[0])
-                tmp_row_cst = cost_function.selector("Row", CostFunction, tmp_row_mat, tmp_row_inv, inputNormType, inputPValue)
+            escapeCandidates = avoid_localMinima_available_row_operator_selection(L_row, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
 
-                escape_candidates.append((tmp_row_cst, op_row[0], op_row[1], 0))
+            escapeCandidates = avoid_localMinima_available_col_operator_selection(L_col, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
 
-            for op_col in L_col:
-                tmp_col_mat = operations.col_i2j(mat, op_col[0], op_col[1])
-                tmp_col_inv = operations.row_i2j(inverse, op_col[1], op_col[0])
-                tmp_col_cst = cost_function.selector("Column", CostFunction, tmp_col_mat, tmp_col_inv, inputNormType, inputPValue)
-
-                escape_candidates.append((tmp_col_cst, op_col[0], op_col[1], 1))
-
-            if len(escape_candidates) > 0:
-                escape_candidates.sort(key=lambda x: x[0])
-                best_escape = escape_candidates[0]
+            if len(escapeCandidates) > 0:
+                escapeCandidates.sort(key=lambda x: x[0])
+                best_escape = escapeCandidates[0]
 
                 print(f"Escaping with operations: ({best_escape[1]}, {best_escape[2]}, {best_escape[3]})")
                 print(f"Accepting cost increase from {minm_cost} to {best_escape[0]}")
@@ -151,7 +86,6 @@ def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
         else:
             select_list = B_row + B_col
 
-            print("The current select_list:", select_list)
 
             if best_row_cst < best_col_cst:
                 minm_cost = best_row_cst
@@ -159,163 +93,17 @@ def parallelGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
                 minm_cost = best_col_cst
             else:
                 minm_cost = best_col_cst
-         
-        # Execution phase
-        if len(select_list) == 0:
-            if len(L_r) > 0:
-                Ls_r.append(L_r)
-                L_r = []
-                row_visi = [0]*SIZE
-                L_row = []
-            if len(L_c) > 0:
-                Ls_c.append(L_c)
-                L_c = []
-                col_visi = [0]*SIZE
-                L_col = []
-            if operations.can_depth_one(mat):
-                one = True
-        else:
-            rand = random.randint(0, len(select_list)-1)
-            select_operator = select_list[rand]
-            print("The select_operator:", select_operator)
-            if select_operator[2] == 0:
-                mat = operations.row_i2j(mat, select_operator[0], select_operator[1])
-                inverse = operations.col_i2j(inverse, select_operator[1], select_operator[0])
-                L_r.append((select_operator[0], select_operator[1], 0))
-                row_op.append((select_operator[0], select_operator[1], 0))
-                if sum(row_visi) == 0:
-                    depth += 1
-                row_visi[select_operator[0]] = 1
-                row_visi[select_operator[1]] = 1
-                print("Currently Row operations:", row_op)
-            else:
-                mat = operations.col_i2j(mat, select_operator[0], select_operator[1])
-                inverse = operations.row_i2j(inverse, select_operator[1], select_operator[0])
-                L_c.append((select_operator[0], select_operator[1], 1))
-                op = (select_operator[0], select_operator[1], 1)
-                col_op.append(op)
-                if sum(col_visi) == 0:
-                    depth += 1
-                col_visi[select_operator[0]] = 1
-                col_visi[select_operator[1]] = 1
-                print("Currently Column oeprations:", col_op)
 
-        # Check depth limit
+        print("The current select_list and minm cost: ", select_list, minm_cost)
+         
+        select_list, L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, inverse, row_op, col_op, row_visi, col_visi, depth, one = operations.available_operator_execution(select_list, L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, inverse, row_op, col_op, row_visi, col_visi, depth, SIZE, one)
+
         if depth > LIMIT:
             print(f"Depth {depth} over minimum limit {LIMIT}, so break this iteration")
-            return
+            flag = True
         else:
             config['DEPTH'] = {'parallelLimit': depth}
             with open('ParallelConfig.ini', 'w') as configfile:
                 config.write(configfile)
-    
-    '''
-    check the last iteration
-    '''
-    if len(L_r) > 0:
-        Ls_r.append(L_r)
-        L_r = []
-        row_visi = [0]*SIZE
-        L_row = []
-    if len(L_c) > 0:
-        Ls_c.append(L_c)
-        L_c = []
-        col_visi = [0]*SIZE
-        L_col = []
 
-    '''
-    check the matrix is different from origin matrix
-    '''
-    reduce = copy.deepcopy(origin)
-    size = 0
-    for r_op in row_op:
-        reduce = operations.row_i2j(reduce, r_op[0], r_op[1])
-        size += 1
-    for c_op in col_op:
-        reduce = operations.col_i2j(reduce, c_op[0], c_op[1])
-        size += 1
-
-    ok = True
-    if ((reduce != mat).all()):
-        ok = False
-
-    if (depth > minm or (depth == minm and size >= minm_size) or not ok):
-        return
-
-    '''
-    update depth and amounts of CNOT
-    '''
-    minm = depth
-    size_minm = size
-
-    '''
-    create the permutation matrix
-    '''
-    per = [0]*SIZE
-    for i in range(SIZE):
-        for j in range(SIZE):
-            if mat[i][j] == 1:
-                per[i] = j
-    
-    '''            
-    create the operation sequence
-    '''
-    seq = []
-    for op_c in col_op:
-        seq.append((op_c[0], op_c[1], 1))
-    for op_r in reversed(row_op):
-        seq.append((per[op_r[0]], per[op_r[1]], 0))
-
-    print("The Ls_c:", Ls_c)
-    print("The Ls_r:", Ls_r)
-    '''
-    create layers for operations
-    '''
-    layers = []
-    for lay_c in Ls_c:
-        nl_c = []
-        for l_c in lay_c:
-            nl_c.append((l_c[0], l_c[1], 1))
-        print("The nl_c:", nl_c)
-        layers.append(nl_c)
-            
-    Ls_r.reverse()
-    for lay_r in Ls_r:
-        nl_r = []
-        for l_r in lay_r:
-            nl_r.append((per[l_r[0]], per[l_r[1]], 0))
-        print("The nl_r:", nl_r)
-        layers.append(nl_r)
-
-    print("The layers for final:", layers)
-    '''
-    Verify the Layers is work
-    1. The collection operators should make identity recover to original matrix
-    2. Every layer and each operator should be distinct
-    '''
-    correct = operations.Verify(origin, layers, seq, mat)
-
-    if correct:
-        with open(f"Parallel_{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
-            for l in layers:
-                for lay in l:
-                    f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
-                f.write("\n")
-            if CostFunction == "norm":
-                if inputNormType == "Lp":
-                    f.write("CNOT: %d, depth: %d and cost function: %s with %s and p value %s occur in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, inputPValue, occur))
-                else:
-                    f.write("CNOT: %d, depth: %d and cost function: %s with %s occur in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, occur))
-            else:
-                f.write("CNOT: %d, depth: %d and cost function: %s occur in %d\n" % (len(seq), len(layers), CostFunction, occur))
-        f.close()
-
-        #store the operations from sequence
-        with open(f"Parallel_{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
-            for i in seq:
-                f.write("%d %d %d\n" % (i[0], i[1], i[2]))
-            f.write("CNOT: %d\n" % (len(seq)))
-        f.close()
-
-    print(str(SIZE) + "-block size for Square Cost that the depth is: ", minm, " and size is: ", size_minm)
-    print(f"The select cost function used in {SIZE} matrix and cost function: {CostFunction}")
+    return L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag

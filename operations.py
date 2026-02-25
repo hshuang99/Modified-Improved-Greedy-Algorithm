@@ -55,8 +55,7 @@ def is_permutation_matrix(matrix):
     if not np.all(np.sum(matrix, axis=0) == 1):
         return False
     return True
-def L_collection(visited, SIZE):
-    L = []
+def L_collection(L, visited, SIZE):
     for i in range(0, SIZE):
         if visited[i] == 1:
             continue
@@ -73,16 +72,18 @@ def can_depth_one(mat):
     if np.any(column_counts > 2):
         return False
     return True
-def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers_c, mat, inverse, row_op, col_op, row_visited, col_visited, depth, SIZE, one):
+def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers_c, L_row, L_col, mat, inverse, row_op, col_op, row_visited, col_visited, depth, SIZE, one):
     if len(select_list) == 0: #every time check the select list is empty
         if len(layer_r) > 0:
             layers_r.append(layer_r)
             layer_r = []
             row_visited = [0]*SIZE
+            L_row = []
         if len(layer_c) > 0:
             layers_c.append(layer_c)
             layer_c = []
             col_visited = [0]*SIZE
+            L_col = []
         if can_depth_one(mat):
             one = True
     else:
@@ -98,6 +99,7 @@ def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers
                 depth += 1
             row_visited[i] = 1 #the control setting 1
             row_visited[j] = 1 #the target setting 1
+            print("Currently Row operations:", row_op)
         else:
             mat = col_i2j(mat, i, j) #otherwise pick the column operation for matrix
             inverse = row_i2j(inverse, j, i) #and inverse execute the row operation
@@ -107,7 +109,8 @@ def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers
                 depth += 1
             col_visited[i] = 1 #on the col visi list record the control to 1
             col_visited[j] = 1 #also record 1 for target
-    return layers_r, layers_c, layer_r, layer_c, row_visited, col_visited, mat, inverse, row_op, col_op, depth, one
+            print("Currently Column operations:", col_op)
+    return select_list, layer_r, layer_c, layers_r, layers_c, L_row, L_col, mat, inverse, row_op, col_op, row_visited, col_visited, depth, one
 
 def available_operator_check(layer_r, layer_c, layers_r, layers_c, row_visited, col_visited, L_row, L_col, SIZE):
     if len(layer_r)>0:

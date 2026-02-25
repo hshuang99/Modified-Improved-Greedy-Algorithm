@@ -1,15 +1,17 @@
-import numpy as np
 import operations
 import cost_function
 import sys
 import random
 import copy
 from RowGreedy import rowGreedy
+from ColGreedy import colGreedy
+from LocalMinimumGreedy import localMinimumGreedy
+from ParallelGreedy import parallelGreedy
 
 '''
 This function will execute the four kind of greedy algorithm depends on type parameter
-- Row/Column
-- Column/Row
+- Row
+- Column
 - LocalMinima
 - Parallel
 '''
@@ -23,13 +25,19 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
     L_r = []; L_c = []
     #Layers_r and Layers_c
     Ls_r = []; Ls_c = []
-    L_row = []; L_col = []
     row_op = []; col_op = []
+    L_row = []; L_col = []
     flag = False
 
     match greedyType:
         case "Row":
-            L_r, L_c, Ls_r, Ls_c, row_visi, col_visi, L_row, L_col, row_op, col_op, depth, flag = rowGreedy(mat, inverse, SIZE, CostFunction, inputNormType, inputPValue, flag)
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+        case "Col":
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+        case "LocalMinima":
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+        case "Parallel":
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
 
     if flag:
         return
@@ -62,40 +70,33 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
     if (depth > minm or (depth == minm and size >= minm_size) or not ok):
         return
 
-    '''
-    update depth and amounts of CNOT
-    '''
+    #update depth and amounts of CNOT
     minm = depth
     size_minm = size
 
-    '''
-    create the permutation matrix
-    '''
+    #create the permutation matrix
     per = [0]*SIZE
     for i in range(SIZE):
         for j in range(SIZE):
             if mat[i][j] == 1:
                 per[i] = j
 
-    '''            
-    create the operation sequence
-    '''
+    #create the operation sequence
     seq = []
     for op_c in col_op:
         seq.append((op_c[0], op_c[1], 1))
     for op_r in reversed(row_op):
         seq.append((per[op_r[0]], per[op_r[1]], 0))
 
-    '''
-    create layers for operations
-    '''
+    
+    #create layers for operations
     layers = []
     for lay_c in Ls_c:
         nl_c = []
         for l_c in lay_c:
             nl_c.append((l_c[0], l_c[1], 1))
         layers.append(nl_c)
-
+    
     Ls_r.reverse()
     for lay_r in Ls_r:
         nl_r = []
@@ -106,7 +107,7 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
     #Verify the Layers is work
     correct = operations.Verify(origin, layers, seq, mat)
     if correct:
-        with open(f"{greedyType}_{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
+        with open(f"{greedyType}_{matName}-{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
             for l in layers:
                 for lay in l:
                     f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
@@ -121,7 +122,7 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
         f.close()
         
         #store the operations from sequence
-        with open(f"{greedyType}_{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
+        with open(f"{greedyType}_{matName}-{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
             for i in seq:
                 f.write("%d, %d, %d\n" % (i[0], i[1], i[2]))
             f.write("CNOT: %d\n" % (len(seq)))
