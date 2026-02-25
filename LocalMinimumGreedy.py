@@ -14,7 +14,7 @@ def localMinimumGreedy(mat, CostFunction, inputNormType, inputPValue, occur):
     depth = 0
     #minm denote as depth
     minm = sys.float_info.max
-    minm_size = SIZE**2
+    minm_size = sys.float_info.max
     minm_cost = sys.float_info.max  # Initialize with current cost
     #copy the current matrix from input
     origin = copy.deepcopy(mat)
