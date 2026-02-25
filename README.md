@@ -47,6 +47,7 @@ python3 main.py <Matrix> <Size> <Greedy Selection> <Cost Function> <Input Norm T
 - Input Norm Type: If you choose the L-norm cost function, you need to specify the norm type. If you select another type of cost function, enter an empty string ("") for this parameter.
 - Input Norm P Value: If you choose the Lp norm cost function, you must provide a number greater than 2 (e.g., 3, 4, ...). If you do not choose the Lp norm function, enter 0.
 - Times: The number of iterations you want to run.
+
 For example, if you would like to execute a LocalMinima Greedy algorithm with origin cost function
 ```
 python3 main.py Matrix/AES.txt 32 LocalMinima origin "" 0 1
