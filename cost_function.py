@@ -40,14 +40,50 @@ def cost_sq(mat):
     #return the calculated square row's Hamming weight
     return ret
 
+def cost_cubic(mat):
+    ret = 0.0
+    SIZE = len(mat)
+    for i in range(0, SIZE): #row
+        hammingWeight = 0.0
+        for j in range(0, SIZE): #column
+            if mat[i][j]: #non-zero entry
+                hammingWeight +=  mat[i][j]
+        ret += hammingWeight ** 3
+    #return the calculated square row's Hamming weight
+    return ret
+
+def cost_fourth(mat):
+    ret = 0.0
+    SIZE = len(mat)
+    for i in range(0, SIZE): #row
+        hammingWeight = 0.0
+        for j in range(0, SIZE): #column
+            if mat[i][j]: #non-zero entry
+                hammingWeight +=  mat[i][j]
+        ret += hammingWeight ** 4
+    #return the calculated square row's Hamming weight
+    return ret
+
 def H_sum(mat, inverse):
     return cost_sum(mat) + cost_sum(inverse)
 
 def H_sqr(mat, inverse):
     return cost_sq(mat)+cost_sq(np.transpose(inverse))
 
+def H_cubr(mat, inverse):
+    return cost_cubic(mat)+cost_cubic(np.transpose(inverse))
+
+def H_four(mat, inverse):
+    return cost_fourth(mat)+cost_fourth(np.transpose(inverse))
+
 def H_sqc(mat, inverse):
-    return cost_sq(np.transpose(mat)) + cost_sq(inverse)    
+    return cost_sq(np.transpose(mat)) + cost_sq(inverse)
+
+def H_cubc(mat, inverse):
+    return cost_cubic(np.transpose(mat)) + cost_cubic(inverse)
+
+def H_fouc(mat, inverse):
+    return cost_fourth(np.transpose(mat)) + cost_fourth(inverse)
 
 def H_logr(mat, inverse):
     return cost_prod(mat) + cost_prod(np.transpose(inverse))
@@ -57,6 +93,12 @@ def H_logc(mat, inverse):
 
 def H_sq_maximum(mat, inverse):
     return max(H_sqr(mat, inverse), H_sqc(mat, inverse))
+
+def H_cube_maximum(mat, inverse):
+    return max(H_cubr(mat, inverse), H_cubc(mat, inverse))
+
+def H_fourth_maximum(mat, inverse):
+    return max(H_four(mat, inverse), H_fouc(mat, inverse))
 
 def H_log_maximum(mat, inverse):
     return max(H_logr(mat, inverse), H_logc(mat, inverse))
@@ -91,6 +133,10 @@ def selector(opType, CostFunction, mat, inv, normType, pValue):
                 tmp_cost = cost_origin(mat, inv)
             case "square":
                 tmp_cost = H_sqr(mat, inv)
+            case "cube":
+                tmp_cost = H_cubr(mat, inv)
+            case "fourth":
+                tmp_cost = H_four(mat, inv)
             case "log":
                 tmp_cost = H_logr(mat, inv)
             case "norm":
@@ -103,6 +149,10 @@ def selector(opType, CostFunction, mat, inv, normType, pValue):
                 tmp_cost = cost_origin(mat, inv)
             case "square":
                 tmp_cost = H_sqc(mat, inv)
+            case "cube":
+                tmp_cost = H_cubc(mat, inv)
+            case "fourth":
+                tmp_cost = H_fouc(mat, inv)
             case "log":
                 tmp_cost = H_logc(mat, inv)
             case "norm":
@@ -115,6 +165,10 @@ def selector(opType, CostFunction, mat, inv, normType, pValue):
                 tmp_cost = cost_origin(mat, inv)
             case "square":
                 tmp_cost = H_sq_maximum(mat, inv)
+            case "cube":
+                tmp_cost = H_cube_maximum(mat, inv)
+            case "fourth":
+                tmp_cost = H_fourth_maximum(mat, inv)
             case "log":
                 tmp_cost = H_log_maximum(mat, inv)
             case "norm":
