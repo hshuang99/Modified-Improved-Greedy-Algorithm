@@ -45,9 +45,5 @@ def rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_vi
         if depth > LIMIT: #the depth is over latest minimum depth
             print(f"Depth {depth} over minimum limit {LIMIT}, so break this iteration")
             flag = True
-        else:
-            config['DEPTH'] = {'rowLimit': depth}
-            with open('RowConfig.ini', 'w') as configfile:
-                config.write(configfile)
     
     return L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag
