@@ -69,9 +69,9 @@ def parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, c
 
             escapeCandidates = []
 
-            escapeCandidates = avoid_localMinima_available_row_operator_selection(L_row, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
+            escapeCandidates = selector.avoid_localMinima_available_row_operator_selection(L_row, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
 
-            escapeCandidates = avoid_localMinima_available_col_operator_selection(L_col, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
+            escapeCandidates = selector.avoid_localMinima_available_col_operator_selection(L_col, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
 
             if len(escapeCandidates) > 0:
                 escapeCandidates.sort(key=lambda x: x[0])
