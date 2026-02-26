@@ -8,6 +8,7 @@ def rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_vi
     SIZE = len(mat)
     minm_cost = sys.float_info.max
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read('RowConfig.ini')
     LIMIT = int(config.get('DEPTH', 'rowLimit'))
     one = False

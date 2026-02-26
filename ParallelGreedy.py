@@ -11,6 +11,7 @@ def parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, c
     B_row = []
     B_col = []
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read('ParallelConfig.ini')
     LIMIT = int(config.get('DEPTH', 'parallelLimit'))
     one = False

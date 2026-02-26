@@ -10,6 +10,7 @@ def colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_vi
     select_list = []
     one = False
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read('ColConfig.ini')
     LIMIT = int(config.get('DEPTH', 'colLimit'))
 
