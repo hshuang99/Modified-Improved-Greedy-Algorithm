@@ -21,7 +21,8 @@ In this project, we implement an approach that reduces the depth of quantum circ
             ├── ParallelConfig.ini
     ├── cost_function.py
     ├── operations.py
-    └── selector.py
+    ├── selector.py
+    └── visualizer.py
 ```
 
 ## Installation
@@ -70,7 +71,7 @@ The algorithm generates the CNOT synthesis result record in files, for example, 
 This result presents the available operators for each layer and records the number of CNOT gates and the circuit depth of the quantum circuit.
 
 Each operator is denoted as (i, j, operation), where 0 represents a row operation and 1 represents a column operation.
-```
+```bash
 (7 15 1)|(6 22 1)|(14 30 1)|(23 31 1)|(28 12 1)|(13 29 1)|(20 4 1)|(21 5 1)|(27 3 1)|(26 10 1)|(2 18 1)|(24 8 1)|(11 19 1)|(25 1 1)|(9 17 1)|(16 0 1)|
 (31 15 1)|(5 29 1)|(27 11 1)|(21 13 1)|(19 3 1)|(17 1 1)|(0 7 1)|(25 9 1)|(18 2 1)|(22 14 1)|(20 28 1)|(12 23 1)|(16 24 1)|
 (7 23 1)|(10 9 1)|(15 22 1)|(1 8 1)|(29 28 1)|(30 5 1)|(26 25 1)|(3 27 1)|(11 31 1)|(0 16 1)|(18 17 1)|(4 20 1)|(6 14 1)|
@@ -86,7 +87,7 @@ CNOT: 121, depth: 11 and cost function: origin occur in 2
 ```
 ### Sequence Results
 Another result presents the synthesized operations of this quantum circuit. This makes it convenient to verify correctness, as we can execute each operator on a matrix to check whether it produces a permutation matrix.
-```
+```bash
 7, 15, 1
 6, 22, 1
 14, 30, 1
@@ -209,4 +210,9 @@ Another result presents the synthesized operations of this quantum circuit. This
 13, 21, 0
 29, 5, 0
 CNOT: 121
+```
+## Visualizer
+The visualizer can plot the results.
+```bash
+python3 visualizer.py Row_AES-32-block-origin_Layer_Results 
 ```
