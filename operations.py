@@ -112,34 +112,6 @@ def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers
             print("Currently Column operations:", col_op)
     return select_list, layer_r, layer_c, layers_r, layers_c, L_row, L_col, mat, inverse, row_op, col_op, row_visited, col_visited, depth, one
 
-def available_operator_check(layer_r, layer_c, layers_r, layers_c, row_visited, col_visited, L_row, L_col, SIZE):
-    if len(layer_r)>0:
-        layers_r.append(layer_r)
-        layer_r = []
-        row_visited = [0]*SIZE
-        L_row = []
-    if len(layer_c)>0:
-        layers_c.append(layer_c)
-        layer_c = []
-        col_visited = [0]*SIZE
-        L_col = []
-    return layers_r, layers_c, layer_r, layer_c, row_visited, col_visited, L_row, L_col
-
-def reduce_matrix(mat, origin, row_op, col_op):
-    reducedMat = copy.deepcopy(origin)
-    size = 0
-    for row_operator in row_op:
-        reducedMat = row_i2j(reducedMat, row_operator[0], row_operator[1])
-        size += 1
-    for col_operator in col_op:
-        reducedMat = col_i2j(reducedMat, col_operator[0], col_operator[1])
-        size += 1
-    reduced = True
-    if ((reducedMat != mat).all()):
-        reduced = False
-    return reduced, size
-
-
 def verify_layer_conflicts(layers):
     """
     Verify that no layer contains conflicting operations (same address in same layer).
