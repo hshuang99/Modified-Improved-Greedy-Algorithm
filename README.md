@@ -26,32 +26,43 @@ In this project, we implement an approach that reduces the depth of quantum circ
 
 ## Installation
 To execute this repo, please create a virtual environment
-```
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 Then install the modules used in the algorithm
-```
+```bash
 pip install numpy
 pip install random
 pip install copy
 ```
 ## Usage
-The command executes this Greedy algorithm
+### Specify the greedy algorithm and cost function type for a single execution
+```bash
+python3 main.py <Matrix> <Greedy Selection> <Cost Function> <Input Norm Type> <Input Norm P Value> <Times>
 ```
-python3 main.py <Matrix> <Size> <Greedy Selection> <Cost Function> <Input Norm Type> <Input Norm P Value> <Times>
-```
-- Matrix: The matrix what we testing
-- Size: The size of the matrix you need to assign. Some matrices have the same structure but different sizes, such as 32×32 and 16×16 versions.
+- Matrix: The matrix what we testing.
 - Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Local Minima, and Parallel.
 - Cost Function: The cost function used to calculate the operation cost. You can choose from sum, origin, square, log, and norm. The norm options include L1, L2, Lp (e.g., 3, 4, ...), and Linf.
 - Input Norm Type: If you choose the L-norm cost function, you need to specify the norm type. If you select another type of cost function, enter an empty string ("") for this parameter.
 - Input Norm P Value: If you choose the Lp norm cost function, you must provide a number greater than 2 (e.g., 3, 4, ...). If you do not choose the Lp norm function, enter 0.
 - Times: The number of iterations you want to run.
 
-For example, if you would like to execute a LocalMinima Greedy algorithm with origin cost function
-```
+For example, if you would like to execute a LocalMinima Greedy algorithm with origin cost function,
+```bash
 python3 main.py Matrix/AES.txt 32 LocalMinima origin "" 0 1
+```
+### Execute all greedy algorithms with cost function combinations using multi-threading
+```bash
+python3 main.py <Matrix> all <Times>
+```
+- Matrix: The matrix what we testing.
+- Times: The number of iterations you want to run.
+The others will be taken from a combination list as input.
+
+For example, if you would like to execute it 1,000 times on the AES.txt matrix,
+```bash
+python3 main.py Matrix/AES.txt all 1000
 ```
 ## Result
 The algorithm generates the CNOT synthesis result record in files, for example, we will make two results
