@@ -3,6 +3,7 @@
 - [Installation](#Installation)
 - [Usage](#Usage)
 - [Result](#Result)
+- [Visualizer](#Visualizer)
 
 ## About
 In this project, we implement an approach that reduces the depth of quantum circuits, specifically focusing on the CNOT gate.
