@@ -21,10 +21,10 @@ def cost_sum(mat):
     return ret
 
 ## Brugière: Gaussian elimination versus greedy methods for the synthesis of linear reversible circuits
-def cost_prod(mat):
+def cost_log(mat):
 	row_counts = np.sum(mat, axis=1)
 	non_zero_counts = row_counts[row_counts > 0]
-	#return the calculated product row's Hamming weight
+	#return the calculated log row's Hamming weight
 	return np.sum(np.log2(non_zero_counts))
 
 ## Shi and Feng: Quantum Circuits of AES with a Low-depth Linear Layer and a New Structure
@@ -86,10 +86,10 @@ def H_fouc(mat, inverse):
     return cost_fourth(np.transpose(mat)) + cost_fourth(inverse)
 
 def H_logr(mat, inverse):
-    return cost_prod(mat) + cost_prod(np.transpose(inverse))
+    return cost_log(mat) + cost_log(np.transpose(inverse))
 
 def H_logc(mat, inverse):
-    return cost_prod(np.transpose(mat))+cost_prod(inverse)
+    return cost_log(np.transpose(mat))+cost_log(inverse)
 
 def H_sq_maximum(mat, inverse):
     return max(H_sqr(mat, inverse), H_sqc(mat, inverse))

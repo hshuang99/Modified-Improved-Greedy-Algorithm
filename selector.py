@@ -13,7 +13,7 @@ def available_row_operator_selection(L_row, L_row_cst, mat, inverse, CostFunctio
             select_list.clear()
             select_list.append((L_row[index][0], L_row[index][1], 0))
             minm_cost = row_op_cst
-        elif row_op_cst == minm_cost:
+        else:
             select_list.append((L_row[index][0], L_row[index][1], 0))
     return select_list, minm_cost
 def available_col_operator_selection(L_col, L_col_cst, mat, inverse, CostFunction, normType, pValue, minm_cost, select_list):
@@ -28,7 +28,7 @@ def available_col_operator_selection(L_col, L_col_cst, mat, inverse, CostFunctio
             select_list.clear() #clear the select list
             select_list.append((L_col[index][0], L_col[index][1], 1))
             minm_cost = col_op_cst #update the new cost
-        elif col_op_cst == minm_cost:
+        else:
             select_list.append((L_col[index][0], L_col[index][1], 1))
     return select_list, minm_cost
 def modified_available_row_operator_selection(L_row, L_row_cst, mat, inverse, CostFunction, normType, pValue, minm_cost, best_row_cst, B_row):
