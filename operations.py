@@ -119,18 +119,16 @@ def verify_layer_conflicts(layers):
     """
     print("The layers in verify_layer_conflicts:", layers)
     for index, layer in enumerate(layers):
-        used_i = set()
-        used_j = set()
+        used = set()
         for op in layer:
             if len(op) == 3:  # (i, j, type) format
                 i, j, op_type = op[0], op[1], op[2]
-                if i in used_i or j in used_j:
+                if i in used or j in used:
                     print(f"Conflict in layer {i}: row operation {op} conflicts with existing operations")
                     return False
-                used_i.add(i)
-                used_j.add(j)
-                print("The used i lists:", used_i)
-                print("The used j lists:", used_j)
+                used.add(i)
+                used.add(j)
+                print("The used list:", used)
     print("All layers are conflict-free!")
     return True
 
