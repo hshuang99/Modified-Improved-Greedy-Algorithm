@@ -16,14 +16,15 @@ In this project, we implement an approach that reduces the depth of quantum circ
             ├── RowConfig.ini
         ├── ColGreedy.py
             ├── ColConfig.ini
-        ├── LocalMinimumGreedy.py
-            ├── LocalMinimaConfig.ini
+        ├── row_or_Col_Greedy.py
+            ├── row_or_Col_Config.ini
         ├── ParallelGreedy.py
             ├── ParallelConfig.ini
     ├── cost_function.py
     ├── operations.py
     ├── selector.py
-    └── visualizer.py
+    ├── visualizer_single.py
+    └── visualizer_all.py
 ```
 
 ## Installation
@@ -41,18 +42,16 @@ pip install copy
 ## Usage
 ### Specify the greedy algorithm and cost function type for a single execution
 ```bash
-python3 main.py <Matrix> <Greedy Selection> <Cost Function> <Input Norm Type> <Input Norm P Value> <Times>
+python3 main.py <Matrix> <Greedy Selection> <Cost Mat Function> <Times>
 ```
 - Matrix: The matrix what we testing.
 - Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Local Minima, and Parallel.
-- Cost Function: The cost function used to calculate the operation cost. You can choose from sum, origin, square, log, and norm. The norm options include L1, L2, Lp (e.g., 3, 4, ...), and Linf.
-- Input Norm Type: If you choose the L-norm cost function, you need to specify the norm type. If you select another type of cost function, enter an empty string ("") for this parameter.
-- Input Norm P Value: If you choose the Lp norm cost function, you must provide a number greater than 2 (e.g., 3, 4, ...). If you do not choose the Lp norm function, enter 0.
+- Cost Mat Function: The cost mat function used to calculate the operation cost. You can choose from sum, square, cube, fourth and log. The function options mapping to 1, 2, 3, 4, -1.
 - Times: The number of iterations you want to run.
 
-For example, if you would like to execute a LocalMinima Greedy algorithm with origin cost function,
+For example, if you would like to execute a row_or_Col Greedy algorithm with square cost function,
 ```bash
-python3 main.py Matrix/AES.txt 32 LocalMinima origin "" 0 1
+python3 main.py Matrix/AES.txt Row_or_Col 2 1
 ```
 ### Execute all greedy algorithms with cost function combinations using multi-threading
 ```bash
@@ -213,7 +212,13 @@ Another result presents the synthesized operations of this quantum circuit. This
 CNOT: 121
 ```
 ## Visualizer
-The visualizer can plot the results.
+### Single Visualizer
+The single visualizer can plot the one results.
 ```bash
-python3 visualizer.py Row_AES-32-block-origin_Layer_Results 
+python3 visualizer_single.py Row_AES-32-block_sq_Layer_Results 
+```
+### All Visualizer
+The all visualizer can plot four types of results.
+```bash
+python3 visualizer_all.py Row_AES-32-block_sq_Layer_Results Col_AES-32-block_sq_Layer_Results Row_or_Col_AES-32-block_sq_Layer_Results Parallel_AES-32-block_sq_Layer_Results
 ```
