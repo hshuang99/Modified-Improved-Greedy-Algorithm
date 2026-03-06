@@ -1,10 +1,11 @@
 import operations
-import cost_function
+from cost_function import cost_mat
 import sys
 import selector
 import configparser
+import numpy as np
 
-def localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth):
+def row_or_Col(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth):
     SIZE = len(mat)
     minm_cost = sys.float_info.max  # Initialize with current cost
     one = False
@@ -13,8 +14,8 @@ def localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_vis
     B_col = []
     config = configparser.ConfigParser()
     config.optionxform = str
-    config.read('LocalMinimaConfig.ini')
-    LIMIT = int(config.get('DEPTH', 'localMinimaLimit'))
+    config.read('row_or_Col_Config.ini')
+    LIMIT = int(config.get('DEPTH', 'row_or_Col_Limit'))
 
     best_row_cst = sys.float_info.max
     best_col_cst = sys.float_info.max
@@ -38,15 +39,20 @@ def localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_vis
         B_row = []
         B_col = []
 
-        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
+        if p_value != "1":
+            H_r = cost_mat(mat, p_value) + cost_mat(np.transpose(inverse), p_value)
+            H_c = cost_mat(np.transpose(mat), p_value) + cost_mat(inverse, p_value)
+            minm_cost = max(H_r, H_c)
+        else:
+            minm_cost = cost_mat(mat, p_value) + cost_mat(np.transpose(inverse), p_value)
+
         print("Current cost:", minm_cost)
 
         L_row = operations.L_collection(L_row, row_visi, SIZE)
+        B_row, best_row_cst, minm_cost = selector.modified_available_row_operator_selection(L_row, L_row_cst, mat, inverse, p_value, minm_cost, best_row_cst, B_row)
+
         L_col = operations.L_collection(L_col, col_visi, SIZE)
-
-        B_row, best_row_cst, minm_cost = selector.modified_available_row_operator_selection(L_row, L_row_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, best_row_cst, B_row)
-
-        B_col, best_col_cst, minm_cost = selector.modified_available_col_operator_selection(L_col, L_col_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, best_col_cst, B_col)
+        B_col, best_col_cst, minm_cost = selector.modified_available_col_operator_selection(L_col, L_col_cst, mat, inverse, p_value, minm_cost, best_col_cst, B_col)
 
         print("The B_row and best_row_cst:", B_row, best_row_cst)
         print("The B_col and best_col_cst:", B_col, best_col_cst)
@@ -64,9 +70,9 @@ def localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_vis
 
             escapeCandidates = []
 
-            escapeCandidates = selector.avoid_localMinima_available_row_operator_selection(L_row, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
+            escapeCandidates = selector.avoid_localMinima_available_row_operator_selection(L_row, mat, inverse, p_value, escapeCandidates)
 
-            escapeCandidates = selector.avoid_localMinima_available_col_operator_selection(L_col, mat, inverse, CostFunction, inputNormType, inputPValue, escapeCandidates)
+            escapeCandidates = selector.avoid_localMinima_available_col_operator_selection(L_col, mat, inverse, p_value, escapeCandidates)
 
             if len(escapeCandidates) > 0:
                 escapeCandidates.sort(key=lambda x: x[0])

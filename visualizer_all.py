@@ -12,11 +12,11 @@ def parse_file(filepath):
     records = []
     filename = os.path.basename(filepath)
 
-    # Extract greedy name from filename
-    # e.g. "Col_AES-32-block-norm_Layer_Results" → greedy = "Col"
-    parts = filename.split('_')
-    greedy_name = parts[0]
-    matrix_name = parts[1] if len(parts) > 1 else 'unknown'  # "AES-32-block"
+    # e.g. "Col_AES-32-block_norm_Layer_Results"
+    #        [0]  [1]            [-3] [-2][-1]
+    parts       = filename.split('_')
+    greedy_name = parts[0]  # "Col"
+    matrix_name = parts[1]  # "AES-32-block"
 
     with open(filepath, 'r') as f:
         for line in f:
@@ -43,21 +43,24 @@ def plot_by_greedy(all_records):
     colors  = ['#e63946', '#2a9d8f', '#f4a261', '#6a4c93']
     markers = ['o', 's', '^', 'D']
 
-    for cost_key, greedy_dict in by_cost.items():
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.set_title(f'Cost Function: {cost_key}', fontsize=13, fontweight='bold')
-        ax.set_xlabel('Occurs In (iteration)', fontsize=11)
-        ax.set_ylabel('Depth', fontsize=11)
-        ax.grid(True, linestyle='--', alpha=0.4)
+    GREEDY_ORDER = ['Row', 'Col', 'LocalMinima', 'Parallel']
 
-        for idx, (greedy_name, records) in enumerate(sorted(greedy_dict.items())):
-            # Sort points by occurs so line connects in order
+    for cost_key, greedy_dict in by_cost.items():
+        greedy_items = sorted(greedy_dict.items(), key=lambda x: GREEDY_ORDER.index(x[0]) if x[0] in GREEDY_ORDER else 99)  # list of (greedy_name, records)
+
+        # 2x2 grid — one subplot per greedy algorithm
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+        fig.suptitle(f'Cost Function: {cost_key}', fontsize=14, fontweight='bold')
+        axes_flat = axes.flatten()  # [top-left, top-right, bottom-left, bottom-right]
+
+        for idx, (greedy_name, records) in enumerate(greedy_items):
+            ax = axes_flat[idx]
+
             records_sorted = sorted(records, key=lambda r: r['occurs'])
             x = [r['occurs'] for r in records_sorted]
             y = [r['depth']  for r in records_sorted]
 
             ax.plot(x, y,
-                    label=greedy_name,
                     color=colors[idx % len(colors)],
                     marker=markers[idx % len(markers)],
                     linewidth=2,
@@ -65,10 +68,19 @@ def plot_by_greedy(all_records):
                     markeredgecolor='black',
                     markeredgewidth=0.5)
 
-        ax.legend(title='Greedy Algorithm', fontsize=10, title_fontsize=10)
+            ax.set_title(greedy_name, fontsize=12, fontweight='bold',
+                         color=colors[idx % len(colors)])
+            ax.set_xlabel('Occurs In (iteration)', fontsize=10)
+            ax.set_ylabel('Depth', fontsize=10)
+            ax.grid(True, linestyle='--', alpha=0.4)
+
+        # Hide any unused subplots if fewer than 4 greedy algorithms
+        for idx in range(len(greedy_items), 4):
+            axes_flat[idx].set_visible(False)
+
         plt.tight_layout()
 
-        safe_cost = cost_key.replace('/', '_')
+        safe_cost = cost_key.replace('/', '_').replace(' ', '').replace('[', '').replace(']', '')
         out = f'plot_{safe_cost}.png'
         plt.savefig(out, dpi=150)
         print(f"Saved: {out}")

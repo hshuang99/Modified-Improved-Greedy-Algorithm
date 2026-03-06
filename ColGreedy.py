@@ -1,10 +1,11 @@
 import operations
-import cost_function
 import sys
 import selector
 import configparser
+from cost_function import cost_mat
+import numpy as np
 
-def colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth):
+def colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth):
     SIZE = len(mat)
     minm_cost = sys.float_info.max
     select_list = []
@@ -25,17 +26,23 @@ def colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_vi
         L_row_cst = []
         L_col_cst = []
 
-        minm_cost = cost_function.selector("global", CostFunction, mat, inverse, inputNormType, inputPValue)
+        if p_value != "1":
+            H_r = cost_mat(mat, p_value) + cost_mat(np.transpose(inverse), p_value)
+            H_c = cost_mat(np.transpose(mat), p_value) + cost_mat(inverse, p_value)
+            minm_cost = max(H_r, H_c)
+        else:
+            minm_cost = cost_mat(mat, p_value) + cost_mat(np.transpose(inverse), p_value)
+
         print("Current Minm Cost:", minm_cost)
 
-        L_row = operations.L_collection(L_row, row_visi, SIZE)
-        L_col = operations.L_collection(L_col, col_visi, SIZE)
 
         #if the matrix is not achieve can depth one property
         if not one:
-            select_list, minm_cost = selector.available_col_operator_selection(L_col, L_col_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, select_list)
+            L_col = operations.L_collection(L_col, col_visi, SIZE)
+            select_list, minm_cost = selector.available_col_operator_selection(L_col, L_col_cst, mat, inverse, p_value, minm_cost, select_list)
  
-        select_list, minm_cost = selector.available_row_operator_selection(L_row, L_row_cst, mat, inverse, CostFunction, inputNormType, inputPValue, minm_cost, select_list)
+        L_row = operations.L_collection(L_row, row_visi, SIZE)
+        select_list, minm_cost = selector.available_row_operator_selection(L_row, L_row_cst, mat, inverse, p_value, minm_cost, select_list)
 
         print("The select list and current minm cost: ", select_list, minm_cost)
                     

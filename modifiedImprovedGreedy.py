@@ -5,17 +5,18 @@ import random
 import copy
 from RowGreedy import rowGreedy
 from ColGreedy import colGreedy
-from LocalMinimumGreedy import localMinimumGreedy
+from row_or_Col_Greedy import row_or_Col
 from ParallelGreedy import parallelGreedy
-
+ALL_COST_MAT_NAME = {"sum": "1", "sq": "2", "cube": "3", "fourth": "4", "log": "-1"}
+REVERSED = {v: k for k, v in ALL_COST_MAT_NAME.items()}
 '''
 This function will execute the four kind of greedy algorithm depends on type parameter
 - Row
 - Column
-- LocalMinima
+- Row_or_Column
 - Parallel
 '''
-def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType, inputPValue, occur):
+def modifiedImprovedGreedy(mat, matName, greedy, p_value, occur):
     # Define variables
     SIZE = len(mat); depth = 0
     minm = sys.float_info.max; minm_size = sys.float_info.max; minm_cost = sys.float_info.max
@@ -29,15 +30,15 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
     L_row = []; L_col = []
     flag = False
 
-    match greedyType:
+    match greedy:
         case "Row":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
         case "Col":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
-        case "LocalMinima":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = localMinimumGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
+        case "Row_or_Col":
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = row_or_Col(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
         case "Parallel":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, CostFunction, inputNormType, inputPValue, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
 
     if flag:
         return
@@ -107,26 +108,20 @@ def modifiedImprovedGreedy(greedyType, mat, matName, CostFunction, inputNormType
     #Verify the Layers is work
     correct = operations.Verify(origin, layers, seq, mat)
     if correct:
-        with open(f"{greedyType}_{matName}-{SIZE}-block-{CostFunction}_Layer_Results", "a") as f:
+        with open(f"{greedy}_{matName}-{SIZE}-block_{REVERSED[p_value]}_Layer_Results", "a") as f:
             for l in layers:
                 for lay in l:
                     f.write("(%d %d %d)|" % (lay[0], lay[1], lay[2]))
                 f.write("\n")
-            if CostFunction == "norm":
-                if inputNormType == "Lp":
-                    f.write("CNOT: %d, depth: %d and cost function: %s with %s and p value: %s occurs in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, inputPValue, occur))
-                else:
-                    f.write("CNOT: %d, depth: %d and cost function: %s with %s occurs in %d\n" % (len(seq), len(layers), CostFunction, inputNormType, occur))
-            else:
-                f.write("CNOT: %d, depth: %d and cost function: %s occurs in %d\n" % (len(seq), len(layers), CostFunction, occur))
+            f.write("CNOT: %d, depth: %d and cost function: %s occurs in %d\n" % (len(seq), len(layers), REVERSED[p_value], occur))
         f.close()
         
         #store the operations from sequence
-        with open(f"{greedyType}_{matName}-{SIZE}-block-{CostFunction}_Sequence_Results", "a") as f:
+        with open(f"{greedy}_{matName}-{SIZE}-block_{REVERSED[p_value]}_Sequence_Results", "a") as f:
             for i in seq:
                 f.write("%d, %d, %d\n" % (i[0], i[1], i[2]))
             f.write("CNOT: %d\n" % (len(seq)))
         f.close()
 
     print(f"{SIZE}-block size that depth is: ", minm, " and size is: ", size_minm)
-    print(f"The select cost function is {CostFunction} and used in {matName} matrix")
+    print(f"The select cost function is {REVERSED[p_value]} and used in {matName} matrix")
