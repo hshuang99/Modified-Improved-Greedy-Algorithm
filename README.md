@@ -1,6 +1,5 @@
 ## Table of Contents
 - [About](#About)
-- [Installation](#Installation)
 - [Usage](#Usage)
 - [Result](#Result)
 - [Visualizer](#Visualizer)
@@ -25,19 +24,6 @@ In this project, we implement an approach that reduces the depth of quantum circ
     ├── selector.py
     ├── visualizer_single.py
     └── visualizer_all.py
-```
-
-## Installation
-To execute this repo, please create a virtual environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-Then install the modules used in the algorithm
-```bash
-pip install numpy
-pip install random
-pip install copy
 ```
 ## Usage
 ### Specify the greedy algorithm and cost function type for a single execution
