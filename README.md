@@ -31,7 +31,7 @@ In this project, we implement an approach that reduces the depth of quantum circ
 python3 main.py <Matrix> <Greedy Selection> <Cost Mat Function> <Times>
 ```
 - Matrix: The matrix what we testing.
-- Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Local Minima, and Parallel.
+- Greedy Selection: The greedy algorithm you want to execute. We provide four types of algorithms: Row, Column, Row_or_Col, and Parallel.
 - Cost Mat Function: The cost mat function used to calculate the operation cost. You can choose from sum, square, cube, fourth and log. The function options mapping to 1, 2, 3, 4, -1.
 - Times: The number of iterations you want to run.
 
