@@ -21,24 +21,22 @@ def modifiedImprovedGreedy(mat, matName, greedy, p_value, occur):
     SIZE = len(mat); depth = 0
     minm = sys.float_info.max; minm_size = sys.float_info.max; minm_cost = sys.float_info.max
     origin = copy.deepcopy(mat); inverse = operations.inv(mat)
-    row_visi = [0]*SIZE; col_visi = [0]*SIZE
     #Layer_r and Layer_c
     L_r = []; L_c = []
     #Layers_r and Layers_c
     Ls_r = []; Ls_c = []
     row_op = []; col_op = []
-    L_row = []; L_col = []
     flag = False
 
     match greedy:
         case "Row":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, mat, row_op, col_op, depth, flag = rowGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c,  row_op, col_op, p_value, flag, depth)
         case "Col":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, mat, row_op, col_op, depth, flag = colGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c,  row_op, col_op, p_value, flag, depth)
         case "Row_or_Col":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = row_or_Col(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, mat, row_op, col_op, depth, flag = row_or_Col(mat, inverse, L_r, L_c, Ls_r, Ls_c,  row_op, col_op, p_value, flag, depth)
         case "Parallel":
-            L_r, L_c, Ls_r, Ls_c, L_row, L_col, mat, row_op, col_op, row_visi, col_visi, depth, flag = parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c, L_row, L_col, row_visi, col_visi, row_op, col_op, p_value, flag, depth)
+            L_r, L_c, Ls_r, Ls_c, mat, row_op, col_op, depth, flag = parallelGreedy(mat, inverse, L_r, L_c, Ls_r, Ls_c,  row_op, col_op, p_value, flag, depth)
 
     if flag:
         return
@@ -47,13 +45,9 @@ def modifiedImprovedGreedy(mat, matName, greedy, p_value, occur):
     if len(L_r) > 0:
         Ls_r.append(L_r)
         L_r = []
-        row_visi = [0]*SIZE
-        L_row = []
     if len(L_c) > 0:
         Ls_c.append(L_c)
         L_c = []
-        col_visi = [0]*SIZE
-        L_col = []
     #check the matrix is different from origin matrix
     reduce = copy.deepcopy(origin)
     size = 0

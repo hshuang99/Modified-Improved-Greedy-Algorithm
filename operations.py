@@ -72,18 +72,16 @@ def can_depth_one(mat):
     if np.any(column_counts > 2):
         return False
     return True
-def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers_c, L_row, L_col, mat, inverse, row_op, col_op, row_visited, col_visited, depth, SIZE, one):
+def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers_c, mat, inverse, row_op, col_op, row_visited, col_visited, depth, SIZE, one):
     if len(select_list) == 0: #every time check the select list is empty
         if len(layer_r) > 0:
             layers_r.append(layer_r)
             layer_r = []
             row_visited = [0]*SIZE
-            L_row = []
         if len(layer_c) > 0:
             layers_c.append(layer_c)
             layer_c = []
             col_visited = [0]*SIZE
-            L_col = []
         if can_depth_one(mat):
             one = True
     else:
@@ -110,7 +108,7 @@ def available_operator_execution(select_list, layer_r, layer_c, layers_r, layers
             col_visited[i] = 1 #on the col visi list record the control to 1
             col_visited[j] = 1 #also record 1 for target
             print("Currently Column operations:", col_op)
-    return select_list, layer_r, layer_c, layers_r, layers_c, L_row, L_col, mat, inverse, row_op, col_op, row_visited, col_visited, depth, one
+    return select_list, layer_r, layer_c, layers_r, layers_c, mat, inverse, row_op, col_op, row_visited, col_visited, depth, one
 
 def verify_layer_conflicts(layers):
     """
